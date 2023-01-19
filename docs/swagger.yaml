@@ -1,0 +1,129 @@
+basePath: /
+definitions:
+  domain.CreateBookInput:
+    properties:
+      name:
+        type: string
+      price:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: ya.maksimka228@gmail.com
+    name: API Support
+  description: This is a sample server celler server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Books Example API
+  version: "1.0"
+paths:
+  /books:
+    get:
+      consumes:
+      - application/json
+      description: Get all books
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+      summary: GetBooks
+      tags:
+      - Books
+    post:
+      consumes:
+      - application/json
+      description: Create new book
+      parameters:
+      - description: create
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateBookInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+      summary: CreateBook
+      tags:
+      - Books
+  /books/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete book by id
+      parameters:
+      - description: Book ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+      summary: DeleteBook
+      tags:
+      - Books
+    get:
+      consumes:
+      - application/json
+      description: Get one book
+      parameters:
+      - description: Book ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+      summary: GetBook
+      tags:
+      - Books
+    put:
+      consumes:
+      - application/json
+      description: Update book by id
+      parameters:
+      - description: Book ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: create
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateBookInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+      summary: UpdateBook
+      tags:
+      - Books
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"
