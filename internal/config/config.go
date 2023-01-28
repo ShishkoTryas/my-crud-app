@@ -1,29 +1,59 @@
 package config
 
 import (
-	"github.com/kelseyhightower/envconfig"
-	log "github.com/sirupsen/logrus"
+	"os"
+	"strconv"
 )
 
 type Config struct {
-	DB Postgres
+	DB     Postgres
+	Phrase Phrase
 }
 
 type Postgres struct {
-	Host     string `default:"localhost"`
-	Port     int    `default:"5432"`
-	Username string `default:"postgres"`
-	DBName   string `default:"postgres"`
-	SSLMode  string `default:"disable"`
-	Password string `default:"02012001"`
+	Host     string
+	Port     int
+	Username string
+	DBName   string
+	SSLMode  string
+	Password string
 }
 
-func New() (*Config, error) {
-	var cfg = new(Config)
-	err := envconfig.Process("DB", &cfg.DB)
-	if err != nil {
-		log.Fatal("Can't create config", err)
+type Phrase struct {
+	Salt   string
+	Secret string
+}
+
+func New() *Config {
+	return &Config{
+		DB: Postgres{
+			Host:     getEnv("DB_HOST", ""),
+			Port:     getEnvAsInt("DB_PORT", 0),
+			Username: getEnv("DB_USERNAME", ""),
+			DBName:   getEnv("DB_NAME", ""),
+			SSLMode:  getEnv("DB_SSLMODE", ""),
+			Password: getEnv("DB_PASSWORD", ""),
+		},
+		Phrase: Phrase{
+			Salt:   getEnv("SALT", ""),
+			Secret: getEnv("SECRET", ""),
+		},
+	}
+}
+
+func getEnv(key string, defaultVal string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
 	}
 
-	return cfg, nil
+	return defaultVal
+}
+
+func getEnvAsInt(name string, defaultVal int) int {
+	valueStr := getEnv(name, "")
+	if value, err := strconv.Atoi(valueStr); err == nil {
+		return value
+	}
+
+	return defaultVal
 }

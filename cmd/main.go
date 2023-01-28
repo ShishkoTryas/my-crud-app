@@ -1,12 +1,15 @@
 package main
 
 import (
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
 	"my-crud-app/internal/config"
 	db3 "my-crud-app/internal/repository/db"
 	"my-crud-app/internal/service"
 	"my-crud-app/internal/transport/rest"
 	db2 "my-crud-app/pkg/db"
+	"my-crud-app/pkg/hash"
 	"net/http"
 	"os"
 )
@@ -15,6 +18,10 @@ func init() {
 	log.SetFormatter(&log.JSONFormatter{})
 	log.SetOutput(os.Stdout)
 	log.SetLevel(log.InfoLevel)
+
+	if err := godotenv.Load(); err != nil {
+		log.Print("No .env file found")
+	}
 }
 
 // @title           Books Example API
@@ -31,12 +38,13 @@ func init() {
 // @host      localhost:8080
 // @BasePath  /
 
-// @securityDefinitions.basic  BasicAuth
+// @securityDefinitions.apikey UserAuth
+// @in header
+// @name Authorization
 func main() {
-	cfg, err := config.New()
-	if err != nil {
-		log.Fatal(err)
-	}
+	cfg := config.New()
+
+	log.Printf("config: %+v\n", cfg)
 
 	db, err := db2.NewPostgresDB(db2.ConnectionInfo{
 		Host:     cfg.DB.Host,
@@ -51,9 +59,14 @@ func main() {
 	}
 	defer db.Close()
 
+	hasher := hash.New(cfg.Phrase.Salt)
+
 	booksRepo := db3.NewBooks(db)
+	userRepo := db3.New(db)
 	booksService := service.NewBooks(booksRepo)
-	handler := rest.NewHandler(booksService)
+	usersService := service.New(userRepo, hasher, []byte(cfg.Phrase.Secret))
+
+	handler := rest.NewHandler(booksService, usersService)
 
 	srv := &http.Server{
 		Addr:    ":8080",

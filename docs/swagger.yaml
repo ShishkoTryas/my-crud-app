@@ -7,6 +7,32 @@ definitions:
       price:
         type: integer
     type: object
+  domain.SignInUser:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  domain.SignUpUser:
+    properties:
+      email:
+        type: string
+      name:
+        minLength: 2
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -20,6 +46,49 @@ info:
   title: Books Example API
   version: "1.0"
 paths:
+  /auth:
+    get:
+      consumes:
+      - application/json
+      description: signIn user
+      parameters:
+      - description: signIn User
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.SignInUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+      summary: SignIn
+      tags:
+      - Auth
+    post:
+      consumes:
+      - application/json
+      description: register user
+      parameters:
+      - description: createUser
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.SignUpUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+      summary: SignUp
+      tags:
+      - Auth
   /books:
     get:
       consumes:
@@ -124,6 +193,8 @@ paths:
       tags:
       - Books
 securityDefinitions:
-  BasicAuth:
-    type: basic
+  UserAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
